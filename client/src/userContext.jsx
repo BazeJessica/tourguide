@@ -1,25 +1,25 @@
-import axios from "axios"
-import {createContext, useEffect, useState  } from "react"
-export const UserContext = createContext({})
+import {createContext, useEffect, useState} from "react";
+import axios from "axios";
+import {data} from "autoprefixer";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "./DbConfig";
+
+export const UserContext = createContext({});
 
 export function UserContextProvider({children}) {
-    const[user,setUser] =useState(null)
-    const[ready,setReady] =useState(false)
-    useEffect(() => {
-            try {
-                axios.get('/profile').then((data) =>{
-                    setUser(data)
-                    setReady(true)
-                })
-                
-            } catch (error) {
-                console.log(error);
-            }
-        
-    },[])
-    return(
-        <UserContext.Provider value={{user,setUser,ready}}>
-             {children}
-        </UserContext.Provider>
-       
-    )}
+  const [user,setUser] = useState(null);
+  const [ready,setReady] = useState(false);
+  useEffect(() => {
+
+   const unsubscribe = onAuthStateChanged(auth, (user)=>{
+    setUser(user)
+   })
+   setReady(true)
+   return unsubscribe
+  }, []);
+  return (
+    <UserContext.Provider value={{user,setUser,ready}}>
+      {children}
+    </UserContext.Provider>
+  );
+}

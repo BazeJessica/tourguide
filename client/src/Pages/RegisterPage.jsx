@@ -1,46 +1,48 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import axios from 'axios'
+import {Link, useNavigate} from "react-router-dom";
+import {useState} from "react";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "../DbConfig";
+ 
+export default function RegisterPage() {
+  const [name,setName] = useState('');
+  const [email,setEmail] = useState('');
+  const [password,setPassword] = useState('');
 
-export default function RegisterPage(){
-    const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
+  const navigate=useNavigate()
 
-    const registerUser = (e) => {
-        e.preventDefault()
-        axios.post("/register", {
-            name,
-            email,
-            password
-        })
+  async function registerUser(ev) {
+    ev.preventDefault();
+    try {
+     await createUserWithEmailAndPassword(auth, email,password)
+     await updateProfile(auth.currentUser,{displayName:name, photoURL:"https://media.istockphoto.com/id/1386479313/photo/happy-millennial-afro-american-business-woman-posing-isolated-on-white.webp?b=1&s=170667a&w=0&k=20&c=ahypUC_KTc95VOsBkzLFZiCQ0VJwewfrSV43BOrLETM="})
+    return navigate("/account")
+    } catch (e) {
+      alert(e.code);
     }
-
-    return(
-        <div className="mt-4 flex grow items-center justify-around">
-            <div className="mb-64">
-                <h1 className="text-4xl text-center">Register</h1>
-                <form className="max-w-md mx-auto" onSubmit={registerUser}> 
-
-                    <input type="text" name="username" value={name} id="username"
-                     placeholder="John Quaye"
-                      onChange={e=> setName(e.target.value)} />
-
-                    <input type="email" name="email" id="email" value={email} 
-                    placeholder="yahoo@gmail.com"
-                     onChange={e=> setEmail(e.target.value)} />
-
-                    <input type="password" name="password" id="password"
-                     placeholder="Password" value={password}
-                      onChange={e=> setPassword(e.target.value)} />
-
-                    <button className="primary">Register</button>
-                    <div className="p-2 text-center text-gray-500">
-                        Already have an account? <Link className="text-black" to={"/login"}>Login</Link>
-                    </div>
-                </form>
-            </div>
-        </div>
-        
-    );
+  }
+  return (
+    <div className="mt-4 grow flex items-center justify-around">
+      <div className="mb-64">
+        <h1 className="text-4xl text-center mb-4">Register</h1>
+        <form className="max-w-md mx-auto" onSubmit={registerUser}>
+          <input type="text"
+                 placeholder="John Doe"
+                 value={name}
+                 onChange={ev => setName(ev.target.value)} />
+          <input type="email"
+                 placeholder="your@email.com"
+                 value={email}
+                 onChange={ev => setEmail(ev.target.value)} />
+          <input type="password"
+                 placeholder="password"
+                 value={password}
+                 onChange={ev => setPassword(ev.target.value)} />
+          <button className="primary">Register</button>
+          <div className="text-center py-2 text-gray-500">
+            Already a member? <Link className="underline text-black" to={'/login'}>Login</Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }
